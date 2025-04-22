@@ -1,11 +1,11 @@
 function [x,costvals] = IRLS(b,x0,options,W,A,AH)
-% Iteratively Reweighted Least-Squares
-% 
-% Computes argmin_x  0.5*||W*(Ax - b)||_2^2 + lambda*g(x)
+% Iteratively Reweighted Least-Squares to compute
+%           argmin_x  0.5*||W*(Ax - b)||_2^2 + lambda*g(x)
 % via a quadratic majorization-minimization approach.
+%
 % The penalty function g(x) is sum(abs(x)^2 + epsilon)^(q/2), which is 
-% convex for q>=1 (local min found for q<1). This implementation supports 
-% complex-valued data.
+% convex for q>=1 (thus, a local min found for q<1). This implementation 
+% supports complex-valued data.
 %
 % For references and background, please see tutorial in Potter et al., IEEE
 % Radar Conference 2025. Please cite the paper when using this code.
@@ -23,6 +23,7 @@ function [x,costvals] = IRLS(b,x0,options,W,A,AH)
 %       options.cgiter  = number of conjugate gradient (inner) iterations
 %       options.maxiter = maximum number of allowed (outer) iterations
 %       options.epsilon = smoothing of functional at origin
+%       options.verbose = 1 to display results (0 for false)
 %       options.thresh  = stopping criterion, ratio of cost function change
 %                         to cost function value. Default is 1e-6
 %       options.ncheck  = how often to test the threshold. By default,
@@ -37,7 +38,7 @@ function [x,costvals] = IRLS(b,x0,options,W,A,AH)
 %   Code Outputs:
 %   x           estimate of the cost function's argmin.
 %   costvals    vector of computed cost function values. 
-%               Only updated every options.ncheck iterations.
+%               (Only updated every options.ncheck iterations.)
 %
 %   Comments:
 %       * Flexibility of options could be removed to reduce overhead at
@@ -54,13 +55,11 @@ if( nargin ==  5 )
 elseif( nargin < 5 )
     error('At least five arguments are required for IRLS.m.')
 end
-
 % prewhitening operator as function handle, as needed
 if(~isa(W,'function_handle'))
     Wmat=W;
     W = @(z) Wmat*z;
 end
-
 % Verify that options are defined and set defaults.
 % Check iterations
 if ~isfield(options,'maxiter')
@@ -73,6 +72,10 @@ end
 %Check thresh
 if ~isfield(options,'thresh')
     options.thresh = 1e-5;
+end
+% Check verbose
+if ~isfield(options,'verbose')
+    options.verbose = 0;
 end
 %Check ncheck
 if ~isfield(options,'ncheck')
@@ -132,9 +135,11 @@ end% end while for iterations
 
 %Inform the user of final result
 costvals(costcount:end)=[];%trim if terminated
-disp(['Total IRLS Iterations completed: ' ...
-    num2str(iter_count) ' out of ' num2str(options.maxiter+1) ' permitted'])
-end%end of function
+if(options.verbose == 1)  
+    disp(['Total IRLS Iterations completed: ' num2str(iter_count) ...
+    ' out of ' num2str(options.maxiter+1) ' permitted'])
+end %end optional display
+end %end of function
 
 
 function [theta] = cg4irls(C,CH,Wb,n,sig,iter)
