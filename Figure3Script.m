@@ -1,7 +1,7 @@
 %% Figure 3 for Radar2025
 % Figure to illustrate multi-target detection statistics
 
-% Simulation: over-sampled DFT (rather than, say, Gaussian A matrix)
+%% Simulation: over-sampled DFT (rather than, say, Gaussian A matrix)
 snrdb = 25;% signal to noise ratio, in dB (per mode)
 n = 2^9;
 m = floor(n/3); %select 1/3 rows at random (I.e., 3x oversampled grid)
@@ -18,20 +18,19 @@ A = A/sqrt(m);%normalize columns
 % Simulate IQ data
 ampl_hi = 10^((snrdb+20*log10(m))/20);%IQ noise unit variance; snr per mode
 ampl_lo = 10^((snrdb-10+20*log10(m))/20); %10dB lower on half of reflectors
-% for on-grid:
+% start with locations on-grid:
 T=randi(n,ceil(1.5*K),1);T=unique(T,'stable');
 T=T(1:K);
 xtrue=zeros(n,1);
-xtrue(T)=ampl_lo;%amplitudes, lo
+xtrue(T)=ampl_lo;%amplitudes, low
 xtrue(T(1:floor(K/2))) = ampl_hi;%amplitudes, high
-% b = A*xtrue;
-%++++++++++ for off-grid points
-points = T - 1 + 0.20*rand(size(T));%perturb off grid
+% for off-grid points,perturb columns of A matrix
+points = T - 1 + 0.20*rand(size(T));
 Aoff = exp(-1j*2*pi*(0:(n-1))'*points'/n)/sqrt(m);
 Aoff = Aoff(rows(:),:);
 b = Aoff*xtrue(T);
-%++++++++++
-b = b + (1/sqrt(2))*(randn(m,1)+1j*randn(m,1));%add noise
+% add noise (CAWGN)
+b = b + (1/sqrt(2))*(randn(m,1)+1j*randn(m,1));
 
 %% Algorithm
 W = eye(m);%unit variance noise
@@ -43,6 +42,7 @@ options.cgiter = 5;
 options.thresh = 1e-5;
 options.ncheck = 50;
 options.maxiter = 3000;
+options.verbose = 0; %zero for false
 
 % Matched Filter
 x_mf = A'*b;
