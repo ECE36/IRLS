@@ -1,7 +1,7 @@
 %% Figure 2 for Radar2025
 % Figure to illustrate quadratic majorization
 %       phi=(abs(x).^2 + epsilon).^(q/2)
-figure(2)
+figure
 q=0.8;
 epsilon=0.001;
 x0=2;
