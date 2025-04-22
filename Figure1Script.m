@@ -4,9 +4,10 @@
 %       q=0.6 quasi-norm
 %       log(abs(x)^2)
 %       log(abs(x))
-%       zero "norm"
-close all;clear vars
-figure(1)
+%       zero norm
+% Scale and shift scalar functions for common display.
+clear vars
+figure
 q=0.6;epsilon=0.001;
 x = -2.5:0.001:2.5;[~,indx]=find(x==1);
 %
@@ -29,5 +30,5 @@ grid on;
 axis([-2.5,2.5,0,2])
 title('Separable Costs, \phi(x), for \epsilon=0.001','Fontsize',18)
 %
-legend('L_1: abs(x)','L_q, abs(x)^{0.6}','ln(x^2)','ln(x)',...
-    'L_0','','','Fontsize',16,'Location','southwest')
+legend('L1: abs(x)','L_q, abs(x)^{0.6}','ln(x^2)','ln(x)',...
+    'L\_0','','','Fontsize',16,'Location','southwest')
